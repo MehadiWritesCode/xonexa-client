@@ -4,12 +4,12 @@
 [![Database](https://img.shields.io/badge/Database-PostgreSQL%20&%20MongoDB-blue.svg)](https://supabase.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Xonexa** is a high-performance, full-stack e-commerce solution built with a **Hybrid Database Architecture**. It uses MongoDB for flexible product catalogs and PostgreSQL (via Supabase) for secure transactional data like users, orders, and carts.
+**Xonexa** is a robust full-stack e-commerce solution featuring a **Hybrid Data Architecture**. It utilizes MongoDB for flexible product catalogs and PostgreSQL (via Supabase) for mission-critical transactional data like user profiles, orders, and shopping carts.
 
 ---
 
 ## 📍 Quick Navigation
-| [Live Demo](#-live-demo-links) | [Features](#-key-features) | [Tech Stack](#-tech-stack) | [DB Setup (SQL)](#-database-schema-setup) | [Project Report](#-project-report--documentation) | [Installation](#-installation--setup-guide) |
+| [Live Demo](#-live-demo-links) | [Features](#-key-features) | [Tech Stack](#-tech-stack) | [DB Setup (SQL)](#-database-schema-setup-postgresql) | [Env Config](#-environment-variables-setup) | [Installation](#-installation--setup-guide) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 
 ---
@@ -23,33 +23,33 @@ Access the application instantly:
 ## 🚀 Key Features
 
 ### 👤 User Experience
-- **Authentication:** Secure JWT-based Login and Google One-Tap Sign-In.
-- **Shopping:** Advanced search, category filtering, and real-time sorting.
-- **Cart & Wishlist:** Persistent storage for user's favorite and selected items.
-- **Dashboard:** Order tracking, detailed bill history, and profile management.
-- **UI/UX:** Seamless animations powered by **Framer Motion**.
+- **Hybrid Database:** MongoDB for Product Schema & PostgreSQL for User/Order management.
+- **Media Management:** Automatic image optimization and hosting via **Cloudinary** & **Multer**.
+- **Product Architecture:** Support for inventory tracking, multi-size stock (S, M, L, XL), and discount logic.
+- **Auth:** Secure JWT-based Login and Google One-Tap Sign-In.
+- **UI/UX:** Seamless animations and transitions powered by **Framer Motion**.
 
 ### 🛠️ Admin Features
-- **Analytics:** Real-time dashboard for Total Sales, Orders, and Products.
+- **Analytics:** Real-time dashboard for Total Sales, Orders, and Products with growth percentage.
 - **Inventory:** Full CRUD for products with Cloudinary image hosting.
-- **Management:** Monitor registered users and manage order delivery statuses.
+- **User Control:** Monitor registered users and manage order delivery statuses.
 
 ---
 
 ## 🛠️ Tech Stack
 - **Frontend:** React (Vite), Tailwind CSS, Framer Motion.
 - **Backend:** Node.js, Express.js.
-- **Databases:** PostgreSQL (Supabase) & MongoDB.
-- **Other Tools:** JWT, Bcrypt, Cloudinary, Multer, Joi.
+- **Databases:** PostgreSQL (Supabase) & MongoDB (Mongoose).
+- **Cloud Services:** Cloudinary (Image Hosting).
 
 ---
 
 ## 🗄️ Database Schema Setup (PostgreSQL)
 
-To set up the relational database, run the following SQL script in your **Supabase SQL Editor**:
+Run this script in your **Supabase SQL Editor** to create the relational structure:
 
 ```sql
--- Create Users Table
+-- 1. Create Users Table
 CREATE TABLE users (
     user_id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -60,7 +60,7 @@ CREATE TABLE users (
     role VARCHAR DEFAULT 'user'
 );
 
--- Create Orders Table
+-- 2. Create Orders Table
 CREATE TABLE orders (
     order_id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -76,7 +76,7 @@ CREATE TABLE orders (
     status VARCHAR DEFAULT 'pending'
 );
 
--- Create Order Items Table
+-- 3. Create Order Items Table
 CREATE TABLE order_items (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     user_id BIGINT REFERENCES users(user_id),
@@ -86,7 +86,7 @@ CREATE TABLE order_items (
     product_id VARCHAR NOT NULL
 );
 
--- Create Shopping Cart Table
+-- 4. Create Shopping Cart Table
 CREATE TABLE shopping_cart (
     cart_id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     added_at TIMESTAMPTZ DEFAULT NOW(),
@@ -95,10 +95,13 @@ CREATE TABLE shopping_cart (
     name VARCHAR,
     price FLOAT8,
     quantity BIGINT DEFAULT 1,
-    image VARCHAR
+    size VARCHAR,
+    image VARCHAR,
+    discount FLOAT8,
+    stock BIGINT
 );
 
--- Create Wishlist Table
+-- 5. Create Wishlist Table
 CREATE TABLE wishlist (
     wishlist_id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -108,47 +111,116 @@ CREATE TABLE wishlist (
     image VARCHAR,
     price FLOAT8
 );
+```
+# 🔐 Environment Variables Setup
 
-📑 Project Report & Documentation
-📂 Download Full Project Report (PDF) (Link your PDF file here)
+## 📂 Server (.env)
 
-📑 System Architecture Diagram (Link your ER Diagram here)
+Create a `.env` file in the server root directory:
 
-💻 Installation & Setup Guide
-1. Clone the Repositories
-Bash
-
-# Clone Frontend
-git clone [https://github.com/your-username/xonexa-client.git](https://github.com/your-username/xonexa-client.git) client
-
-# Clone Backend
-git clone [https://github.com/your-username/xonexa-server.git](https://github.com/your-username/xonexa-server.git) server
-2. Backend Setup
-Bash
-cd server
-npm install
-Create a .env file in the /server folder:
-
-
+```env
 PORT=5000
-MONGO_URI=your_mongodb_connection_string
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_KEY=your_supabase_anon_key
+
+# MongoDB Configuration
+MONGODB_URI=your_mongodb_connection_string
+
+# Supabase / PostgreSQL Configuration
+SUPABASE_DATABASE_URL_DIRECT=your_supabase_postgresql_direct_url
+
+# Security
 JWT_SECRET=your_secret_key
+
+# Cloudinary Configuration
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
-Start Server: npm start
+```
 
-3. Frontend Setup
-Bash
+---
+
+## 📂 Client (.env)
+
+Create a `.env` file in the client root directory:
+
+```env
+VITE_API_URL=http://localhost:5000
+VITE_GOOGLE_CLIENT_ID=your_google_auth_id
+```
+
+---
+
+# 💻 Installation & Setup Guide
+
+## 1️⃣ Clone the Repositories
+
+```bash
+# Create a folder for the project
+mkdir xonexa-project
+cd xonexa-project
+
+# Clone Frontend Repository
+git clone https://github.com/your-username/xonexa-client.git client
+
+# Clone Backend Repository
+git clone https://github.com/your-username/xonexa-server.git server
+```
+
+---
+
+## 2️⃣ Backend Initialization
+
+```bash
+cd server
+npm install
+
+# Configure your .env file before running the server
+npm start
+```
+
+---
+
+## 3️⃣ Frontend Initialization
+
+```bash
 cd ../client
 npm install
-Create a .env file in the /client folder:
+npm run dev
+```
 
+---
 
-VITE_API_URL=http://localhost:5000
-VITE_GOOGLE_CLIENT_ID=your_google_id
-Start App: npm run dev
+# 📊 System Architecture
 
-Made with ❤️ by Md. Mehadi Hasan
+```txt
+The system architecture is designed for scalability and performance.
+
+• MongoDB
+  - Handles the Product Catalog
+  - Supports flexible schema (sizes, image arrays, metadata)
+
+• PostgreSQL (Supabase)
+  - Used for Users, Orders, and Carts
+  - Ensures strong relational data integrity
+
+• Cloudinary
+  - Handles image storage
+  - Improves performance using CDN
+  - Reduces server load
+```
+
+---
+
+# 📑 Project Report & Documentation
+
+```txt
+• Full Project Report (PDF)
+  - Add your PDF link here
+```
+
+---
+
+# ❤️ Credits
+
+```txt
+Made with ❤️ by Md.Mehadi Hasan
+```
