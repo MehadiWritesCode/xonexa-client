@@ -159,10 +159,10 @@ mkdir xonexa-project
 cd xonexa-project
 
 # Clone Frontend Repository
-git clone https://github.com/your-username/xonexa-client.git client
+git clone  https://github.com/MehadiWirtesCode/xonexa-client
 
 # Clone Backend Repository
-git clone https://github.com/your-username/xonexa-server.git server
+git clone  https://github.com/MehadiWirtesCode/xonexa-server
 ```
 
 ---
